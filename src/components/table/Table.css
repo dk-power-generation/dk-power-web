@@ -1,0 +1,66 @@
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.dark-theme-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #444;
+}
+
+.dark-theme-table th,
+.dark-theme-table td {
+  border: 1px solid #444;
+  padding: 8px;
+}
+
+.dark-theme-table tr {
+  transition: background-color 0.3s ease;
+}
+
+.dark-theme-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.resizable-th {
+  position: relative;
+  padding-right: 10px;
+}
+
+.th-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+  z-index: 1;
+}
+
+.resizer:hover,
+.resizer.isResizing {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.column-filter {
+  width: 100%;
+  padding: 5px;
+  margin-top: 5px;
+  border: 1px solid #444;
+  background-color: #282c34;
+  color: white;
+}
+
+.column-filter::placeholder {
+  color: #888;
+}
