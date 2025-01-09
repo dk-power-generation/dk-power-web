@@ -1,19 +1,22 @@
-
 import { useState } from 'react';
 
 const useForm = (initialValues, validate) => {
-  const [values, setValues] = useState(initialValues);
+  const [values, setFormValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setValues({ ...values, [name]: value });
+    setFormValues(prevValues => ({
+      ...prevValues,
+      [name]: value
+    }));
   };
 
   const handleSubmit = (callback) => (e) => {
     e.preventDefault();
     console.log('handleSubmit called');
-    const validationErrors = validate(values);
+    const validationErrors = [];
+    // const validationErrors = validate(values);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
       console.log('No validation errors, calling callback');
@@ -23,7 +26,14 @@ const useForm = (initialValues, validate) => {
     }
   };
 
-  return { values, errors, handleChange, handleSubmit };
+  const setValues = (newValues) => {
+    setFormValues(prevValues => ({
+      ...prevValues,
+      ...(typeof newValues === 'function' ? newValues(prevValues) : newValues)
+    }));
+  };
+
+  return { values, errors, handleChange, handleSubmit, setValues };
 };
 
 export default useForm;

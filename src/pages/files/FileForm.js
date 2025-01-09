@@ -44,7 +44,7 @@ const FileForm = ({ onSubmit }) => {
     return errors;
   };
 
-  const { values, errors, handleChange, handleSubmit} = useForm(
+  const { values, errors, handleChange, handleSubmit, setValues} = useForm(
     {
       fileNumber: '',
       fileType: '',
@@ -55,14 +55,12 @@ const FileForm = ({ onSubmit }) => {
     validate
   );
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-  
-    if (useFileNameAsNumber && selectedFile) {
-      const fileNameWithoutExtension = selectedFile.name.split('.').slice(0, -1).join('.');
-      handleChange({ target: { name: 'fileNumber', value: fileNameWithoutExtension } });
-    }
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setValues(prevValues => ({
+      ...prevValues,
+      [name]: value
+    }));
   };
 
   const handleCheckboxChange = (e) => {
@@ -70,14 +68,24 @@ const FileForm = ({ onSubmit }) => {
     const updatedValues = checked
       ? [...values[name], value]
       : values[name].filter(item => item !== value);
-    handleChange({ target: { name, value: updatedValues } });
+    setValues({ ...values, [name]: updatedValues });
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+  
+    if (useFileNameAsNumber && selectedFile) {
+      const fileNameWithoutExtension = selectedFile.name.split('.').slice(0, -1).join('.');
+      setValues({ ...values, fileNumber: fileNameWithoutExtension });
+    }
   };
 
   const handleUseFileNameChange = (e) => {
     setUseFileNameAsNumber(e.target.checked);
     if (e.target.checked && file) {
       const fileNameWithoutExtension = file.name.split('.').slice(0, -1).join('.');
-      handleChange({ target: { name: 'fileNumber', value: fileNameWithoutExtension } });
+      setValues({ ...values, fileNumber: fileNameWithoutExtension });
     }
   };
 
@@ -87,14 +95,28 @@ const FileForm = ({ onSubmit }) => {
 
     console.log('submitting form with values:', formValues);
     
-    // Append each form value to formData
-    Object.keys(formValues).forEach(key => {
-      if (Array.isArray(formValues[key])) {
-        formValues[key].forEach(value => formData.append(key + '[]', value));
-      } else {
-        formData.append(key, formValues[key]);
-      }
-    });
+    // // Append each form value to formData
+    // Object.keys(formValues).forEach(key => {
+    //   if (Array.isArray(formValues[key])) {
+    //     formValues[key].forEach(value => formData.append(key + '[]', value));
+    //   } else {
+    //     formData.append(key, formValues[key]);
+    //   }
+    // });
+
+      // Create a fileDto object
+    const fileDto = {
+        fileNumber: formValues.fileNumber,
+        fileType: formValues.fileType,
+        vendor: formValues.vendor,
+        systems: formValues.systems,
+        tags: formValues.tags
+    };
+
+    // Append fileDto as a JSON string
+    formData.append('fileDto', new Blob([JSON.stringify(fileDto)], {
+        type: "application/json"
+    }));
   
     try {
       const result = await fileService.createFile(formData);

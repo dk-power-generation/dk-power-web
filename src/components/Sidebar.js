@@ -43,7 +43,7 @@ function Sidebar({ width, onResize, isVisible }) {
       className={`sidebar ${isVisible ? '' : 'hidden'}`}
       style={{ width: `${width}px` }}
     >
-      <div ref={resizerRef} className="resizer"></div>
+      <div ref={resizerRef} className="menu-resizer"></div>
       <h2>Sidebar</h2>
       <ul>
         <li>Menu Item 1</li>

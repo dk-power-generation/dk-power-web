@@ -105,7 +105,11 @@ function Files() {
     return Object.keys(flattenObject(files[0])).map(key => 
       columnHelper.accessor(key, {
         header: () => normalizeLabel(key.split('.').pop()),
-        cell: info => info.getValue(),
+        cell: info => {
+          // Use optional chaining and nullish coalescing to safely access the value
+          const value = info?.getValue?.() ?? 'N/A';
+          return value;
+        },
       })
     );
   }, [files]);
