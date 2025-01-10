@@ -99,25 +99,60 @@ function Files() {
   
   const columnHelper = createColumnHelper();
 
+  const ignoredColumns = ['id', 'objectType', 'folder', 'rootPath', 'path', 'extension', 'elements'];
+
   const columns = React.useMemo(() => {
     if (files.length === 0) return [];
     
-    return Object.keys(flattenObject(files[0])).map(key => 
-      columnHelper.accessor(key, {
-        header: () => normalizeLabel(key.split('.').pop()),
-        cell: info => {
-          // Use optional chaining and nullish coalescing to safely access the value
-          const value = info?.getValue?.() ?? 'N/A';
-          return value;
-        },
-      })
-    );
+    return Object.keys(files[0])
+      .filter(key => !ignoredColumns.includes(key))
+      .map(key => 
+        columnHelper.accessor(key, {
+          header: () => normalizeLabel(key),
+          cell: info => {
+            const value = info.getValue();
+            if (value === null || value === undefined) return 'N/A';
+            
+            if (Array.isArray(value)) {
+              return value.map(item => {
+                if (typeof item === 'object' && item !== null) {
+                  return item.name || JSON.stringify(item);
+                }
+                return item;
+              }).join(', ');
+            }
+            
+            if (typeof value === 'object' && value !== null) {
+              return value.name || JSON.stringify(value);
+            }
+            
+            return value.toString();
+          },
+        })
+      );
   }, [files]);
   
-  const filteredFiles = files.map(file => flattenObject(file)).filter((file) =>
-    Object.values(file).some((value) =>
-      value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  const filteredFiles = files.filter((file) =>
+    Object.entries(file)
+      .filter(([key]) => !ignoredColumns.includes(key))
+      .some(([key, value]) => {
+        if (value === null || value === undefined) return false;
+        
+        if (Array.isArray(value)) {
+          return value.some(item => {
+            if (typeof item === 'object' && item !== null) {
+              return item.name && item.name.toString().toLowerCase().includes(searchTerm.toLowerCase());
+            }
+            return item.toString().toLowerCase().includes(searchTerm.toLowerCase());
+          });
+        }
+        
+        if (typeof value === 'object' && value !== null) {
+          return value.name && value.name.toString().toLowerCase().includes(searchTerm.toLowerCase());
+        }
+        
+        return value.toString().toLowerCase().includes(searchTerm.toLowerCase());
+      })
   );
 
   if (isLoading) return <div>Loading...</div>;

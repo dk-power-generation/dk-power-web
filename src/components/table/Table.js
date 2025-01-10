@@ -108,6 +108,15 @@ function Table({ columns, data, onRowClick }) {
     columnResizeMode: 'onChange',
   });
 
+  const getHeaderString = (header) => {
+    if (header == null) return '';
+    if (typeof header === 'function') return String(header());
+    if (typeof header === 'object' && React.isValidElement(header)) {
+      return React.Children.toArray(header.props.children).join('');
+    }
+    return String(header);
+  };
+
   return (
     <div className="table-wrapper">
       <table className="dark-theme-table responsive-table" style={{ width: table.getCenterTotalSize() }}>
@@ -119,7 +128,7 @@ function Table({ columns, data, onRowClick }) {
                   key={header.id} 
                   style={{ width: header.getSize() }}
                   className="resizable-th"
-                  data-label={header.column.columnDef.header}
+                  data-label={getHeaderString(header.column.columnDef.header)}
                 >
                   <div className="th-content">
                     <div onClick={header.column.getToggleSortingHandler()}>
@@ -159,7 +168,7 @@ function Table({ columns, data, onRowClick }) {
                 <td 
                   key={cell.id} 
                   style={{ width: cell.column.getSize() }}
-                  data-label={cell.column.columnDef.header}
+                  data-label={getHeaderString(cell.column.columnDef.header)}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>

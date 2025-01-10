@@ -6,6 +6,7 @@ import { fileService, valueService } from '../../api';
 
 const FileForm = ({ onSubmit }) => {
   const [vendors, setVendors] = useState([]);
+  const [fileTypes, setFileTypes] = useState([]);
   const [systems, setSystems] = useState([]);
   const [tags, setTags] = useState([]);
   const [file, setFile] = useState(null);
@@ -18,10 +19,12 @@ const FileForm = ({ onSubmit }) => {
         const vendorOptions = await valueService.getValuesByCategory('vendor');
         const systemOptions = await valueService.getValuesByCategory('system');
         const tagOptions = await valueService.getValuesByCategory('fileTag');
+        const fileType = await valueService.getValuesByCategory('fileType');
         
         setVendors(vendorOptions);
         setSystems(systemOptions);
         setTags(tagOptions);
+        setFileTypes(fileType);
       } catch (error) {
         console.error('Error fetching options:', error);
       }
@@ -94,23 +97,14 @@ const FileForm = ({ onSubmit }) => {
     formData.append('file', file);
 
     console.log('submitting form with values:', formValues);
-    
-    // // Append each form value to formData
-    // Object.keys(formValues).forEach(key => {
-    //   if (Array.isArray(formValues[key])) {
-    //     formValues[key].forEach(value => formData.append(key + '[]', value));
-    //   } else {
-    //     formData.append(key, formValues[key]);
-    //   }
-    // });
 
       // Create a fileDto object
     const fileDto = {
         fileNumber: formValues.fileNumber,
-        fileType: formValues.fileType,
-        vendor: formValues.vendor,
-        systems: formValues.systems,
-        tags: formValues.tags
+        fileType: {id:formValues.fileType},
+        vendor: {id:formValues.vendor},
+        systems: formValues.systems.map(id => ({id: id})),
+        tags: formValues.tags.map(id => ({id: id}))
     };
 
     // Append fileDto as a JSON string
@@ -128,10 +122,11 @@ const FileForm = ({ onSubmit }) => {
     }
   };
 
+
   return (
     <form onSubmit={(e) => {
-        console.log('Form submitted');
-        handleSubmit(submitForm)(e);
+        e.preventDefault();
+        submitForm(values);
       }}>
       <div>
         <label htmlFor="file">Attach File:</label>
@@ -169,13 +164,17 @@ const FileForm = ({ onSubmit }) => {
 
       <div>
         <label htmlFor="fileType">File Type:</label>
-        <input
-          type="text"
+        <select
           id="fileType"
           name="fileType"
           value={values.fileType}
           onChange={handleChange}
-        />
+        >
+          <option value="">Select a file type</option>
+          {fileTypes.map(ft => (
+            <option key={ft.id} value={ft.id}>{ft.name}</option>
+          ))}
+        </select>
         {errors.fileType && <span className="error">{errors.fileType}</span>}
       </div>
 
