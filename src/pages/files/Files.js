@@ -18,11 +18,6 @@ function Files() {
 
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    console.log('fileService:', fileService);
-    console.log('getFiles function:', fileService.getFiles);
-  }, []);
-
   const { 
     data: filesResponse, 
     isLoading, 
